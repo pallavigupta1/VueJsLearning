@@ -1,9 +1,10 @@
 <template>
-  <q-page class="flex  column  ">
+  <q-page class="flex  column  "  :class="bgClass">
     <div class="col q-pt-lg q-px-md">
        <q-input
       v-model="search"
-    placeholder="search" dark borderless   >
+    placeholder="search"
+    @keyup.enter="getWeatherBySearch" dark borderless   >
         <template v-slot:before>
           <q-icon
           @click="getLocation"
@@ -13,21 +14,23 @@
 
 
         <template v-slot:append>
-          <q-btn round dense flat icon="search" />
+          <q-btn
+          @click="getWeatherBySearch"
+          round dense flat icon="search" />
         </template>
       </q-input>
     </div>
 <template v-if="weatherDatas">
    <div class="col text-white text-center">
     <div class="text-h4 text-weight-light">
-      Manchester
+      {{weatherDatas.name}}
     </div>
      <div class="text-h6 text-weight-light">
-       Rain
+       {{weatherDatas.weather[0].main}}
      </div>
       <div class="text-h1 text-weight-thin q-my-lg
       relative-position">
-        <span>8</span>
+        <span>{{Math.round(weatherDatas.main.temp)}}</span>
         <span class="text-h4 relative-position degree">&deg;</span>
 
       </div>
@@ -63,22 +66,65 @@ export default {
   data(){
     return{
           search: '',
-          weatherData: null,
+          weatherDatas: null,
           lat: null,
-          long: null
+          lon: null,
+          apiUrl:'https://api.openweathermap.org/data/2.5/weather',
+          apiKey:'d2523fb1bf20a2c7ef5550ce44dbf858'
+    }
+  },
+  computed: {
+    bgClass(){
+      if(this.weatherDatas){
+        if(this.weatherDatas.weather[0].icon.endsWith('n')){
+           return 'bg-night'
+        }else{
+           return 'bg-day'
+        }
+
+      }
     }
   },
   methods: {
-  getLocation(){
+  getLocation() {
+    this.$q.loading.show()
+  if(this.$q.platform.is.electron){
+    this.$$axios.get('https://freegeoip.app/json/').then(response => {
+      this.lat = response.data.latitude
+      this.lon = response.data.longitude
+      this.getWeatherByCoords()
+    })
+  }else{
     navigator.geolocation.getCurrentPosition(position=>{
       this.lat = position.coords.latitude
-      this.long = position.coords.longitude
+      this.lon = position.coords.longitude
       this.getWeatherByCoords()
+    })
+  }
+
+
+
+
+  },
+  getWeatherByCoords() {
+    this.$q.loading.show()
+    console.log("hsadfsjdjhd");
+    this.$axios('${this.apiUrl}?q=${this.search}&appid=${this.apiKey}&units=metric').
+    then(response =>{
+      this.weatherDatas = response.data
+      console.log("hum++++++++",this.weatherDatas);
+       this.$q.loading.hide()
     })
 
   },
-  getWeatherByCoords(){
-
+  getWeatherBySearch(){
+    this.$q.loading.show()
+  this.$axios('${this.apiUrl}?q=${this.search}&appid=${this.apiKey}&units=metric').
+    then(response =>{
+      this.weatherDatas = response.data
+      console.log("hum++++++++",this.weatherDatas);
+      this.$q.loading.hide()
+    })
   }
   }
 
@@ -87,7 +133,9 @@ export default {
 
 <style>
 .q-page{
-  background: linear-gradient(to right, #2c3e50, #4ca1af)
+  background: linear-gradient(to right, #2c3e50, #4ca1af);
+  /* background: linear-gradient(to top, #485563, #29323c); */
+  /* background: linear-gradient(to left, #ede574, #e1f5c4); */
 
 }
 .degree{
