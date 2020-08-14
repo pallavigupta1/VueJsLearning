@@ -4,7 +4,7 @@
        <q-input
       v-model="search"
     placeholder="search"
-    @keyup.enter="getWeatherBySearch" dark borderless   >
+    @keyup.enter="getWeatherBySearch" dark borderless >
         <template v-slot:before>
           <q-icon
           @click="getLocation"
@@ -109,20 +109,18 @@ export default {
   getWeatherByCoords() {
     this.$q.loading.show()
     console.log("hsadfsjdjhd");
-    this.$axios('${this.apiUrl}?q=${this.search}&appid=${this.apiKey}&units=metric').
-    then(response =>{
+    this.$axios(`${this.apiUrl}?q=${this.search}&appid=${this.apiKey}&units=metric`).then(response =>{
       this.weatherDatas = response.data
-      console.log("hum++++++++",this.weatherDatas);
+      // console.log("hum++++++++",this.weatherDatas);
        this.$q.loading.hide()
     })
 
   },
   getWeatherBySearch(){
     this.$q.loading.show()
-  this.$axios('${this.apiUrl}?q=${this.search}&appid=${this.apiKey}&units=metric').
-    then(response =>{
+  this.$axios(`${this.apiUrl}?q=${this.search}&appid=${this.apiKey}&units=metric`).then(response =>{
       this.weatherDatas = response.data
-      console.log("hum++++++++",this.weatherDatas);
+      // console.log("hum++++++++",this.weatherDatas);
       this.$q.loading.hide()
     })
   }
